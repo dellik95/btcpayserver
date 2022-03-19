@@ -1,0 +1,40 @@
+{
+	"info": {
+		"_postman_id": "cc3f8e3b-1ea1-42a1-bf7e-28e3d6e614db",
+		"name": "BTCPay",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Modify Transaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labelToRemove\": \"test changed\",\r\n    \"comment\": \"test now\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:14142/api/wallets/S-6GfW6m9aSvf72moe5Yt4BAP4qZLwKcU78qHt3BjRM9ea-BTC/transactions/f55cb25ac1c2bb3300d1d0fe4a5521e9ae3928650bb4f5d4110a1a7bb8b1c3d1",
+					"host": [
+						"localhost"
+					],
+					"port": "14142",
+					"path": [
+						"api",
+						"wallets",
+						"S-6GfW6m9aSvf72moe5Yt4BAP4qZLwKcU78qHt3BjRM9ea-BTC",
+						"transactions",
+						"f55cb25ac1c2bb3300d1d0fe4a5521e9ae3928650bb4f5d4110a1a7bb8b1c3d1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
