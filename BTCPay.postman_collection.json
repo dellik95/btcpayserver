@@ -6,13 +6,28 @@
 	},
 	"item": [
 		{
-			"name": "Modify Transaction",
+			"name": "Create auth token",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "test@test.com",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "test@test.com",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"labelToRemove\": \"test changed\",\r\n    \"comment\": \"test now\"\r\n}",
+					"raw": "{\r\n    \r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -20,17 +35,74 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:14142/api/wallets/S-6GfW6m9aSvf72moe5Yt4BAP4qZLwKcU78qHt3BjRM9ea-BTC/transactions/f55cb25ac1c2bb3300d1d0fe4a5521e9ae3928650bb4f5d4110a1a7bb8b1c3d1",
+					"raw": "127.0.0.1:14142/api/v1/api-keys",
 					"host": [
-						"localhost"
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "14142",
+					"path": [
+						"api",
+						"v1",
+						"api-keys"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifi transaction",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "test@test.com",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "test@test.com",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "token 73334adcc8f76c0dffa893a0379daa8357625f84",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labelToAdd\": \"fdsf\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "127.0.0.1:14142/api/wallets/S-HWbSJk4NoM3QmiEskZqxhStmdLfNhu8bEiyvbD2xQ2oc-BTC/transactions/acd207768cb0d40cb6a411829ecfaa0f2cba5fcd24a40cbb67b19eb8d7290b51",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
 					],
 					"port": "14142",
 					"path": [
 						"api",
 						"wallets",
-						"S-6GfW6m9aSvf72moe5Yt4BAP4qZLwKcU78qHt3BjRM9ea-BTC",
+						"S-HWbSJk4NoM3QmiEskZqxhStmdLfNhu8bEiyvbD2xQ2oc-BTC",
 						"transactions",
-						"f55cb25ac1c2bb3300d1d0fe4a5521e9ae3928650bb4f5d4110a1a7bb8b1c3d1"
+						"acd207768cb0d40cb6a411829ecfaa0f2cba5fcd24a40cbb67b19eb8d7290b51"
 					]
 				}
 			},
