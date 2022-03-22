@@ -12,10 +12,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 using BTCPayServer.Services.Stores;
 using BTCPayServer.Abstractions.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using BTCPayServer.Abstractions.Constants;
 
 namespace BTCPayServer.Controllers
 {
     [Route("api/wallets/{walletId}/transactions")]
+    [Authorize(AuthenticationSchemes = AuthenticationSchemes.Greenfield)]
     [ApiController]
     [EnableCors(CorsPolicies.All)]
     public class WalletsApiController : ControllerBase
