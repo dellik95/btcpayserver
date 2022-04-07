@@ -339,7 +339,8 @@ namespace BTCPayServer.Controllers
                     }
 
                     if (labelFilter == null ||
-                        vm.Labels.Any(l => l.Text.Equals(labelFilter, StringComparison.OrdinalIgnoreCase)))
+                        vm.Labels.Any(l =>
+                            labelFilter.Split(",").Any(f => f.Equals(l.Text, StringComparison.OrdinalIgnoreCase))))
                         model.Transactions.Add(vm);
                 }
 

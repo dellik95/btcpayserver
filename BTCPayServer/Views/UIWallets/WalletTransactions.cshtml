@@ -7,6 +7,21 @@
 
 @section PageHeadContent {
     <style>
+    
+        #filter-input {
+            height: 30px !important;
+            margin: 0;
+        }
+        .filter-actions { 
+            flex-direction: column;
+            justify-content: space-between;
+            border-radius: 0 5px 5px 0 !important;
+        }
+        .filter-actions > a { 
+            height: 100%;
+            border-radius: 0 0 0 0;
+        }
+        
         .smMaxWidth {
             max-width: 125px;
         }
@@ -64,6 +79,7 @@
 @section PageFootContent {
     @*Without async, somehow selenium do not manage to click on links in this page*@
     <script src="~/modal/btcpay.js" asp-append-version="true" async></script>
+    <script src="~/main/wallet-filter.js" asp-append-version="true"></script>
 
     @* Custom Range Modal *@
     <script>
@@ -73,6 +89,7 @@
                 checkbox.checked = e.target.checked;
             });
         });
+        initFilters();
     </script>
 }
 
@@ -81,18 +98,27 @@
     <div class="d-flex align-items-center gap-3 mb-2">
         @if (Model.Labels.Any())
         {
+            <datalist id="filter-input-list">
+                @foreach (var label in Model.Labels)
+                {
+                    <option data-tLabel-color="@label.Color" data-tLabel-textColor="@label.TextColor" data-tLabel-text="@label.Text">@label.TextColor</option>
+                }
+            </datalist>
             <div class="input-group">
                 <span class="input-group-text">Filter</span>
                 <div class="form-control d-flex flex-wrap gap-2 align-items-center">
-                    @foreach (var label in Model.Labels)
-                    {
-                        <a asp-route-labelFilter="@label.Text" class="badge position-relative text-white flex-grow-0" style="background-color:@label.Color;color:@label.TextColor !important;">@label.Text</a>
-                    }
+                    <div id="filters-container"></div>
+                    <input id="filter-input" placeholder="Enter filter" class="form-control"/>
                 </div>
-                @if (Context.Request.Query.ContainsKey("labelFilter"))
-                {
-                    <a asp-route-labelFilter="" class="btn btn-secondary d-flex align-items-center">Clear filter</a>
-                }
+                <div class="d-flex filter-actions">
+                    
+                    @if (Context.Request.Query.ContainsKey("labelFilter"))
+                    {
+                        <a asp-route-labelFilter="" class="btn btn-secondary d-flex align-items-center">Clear filter</a>
+                    }
+                    <a id="apply-filter-btn" class="btn btn-primary d-flex align-items-center ">Apply filter</a>
+                </div>
+
             </div>
         }
         <div class="dropdown ms-auto">
@@ -101,12 +127,12 @@
             </button>
             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="ActionsDropdownToggle">
                 <form id="WalletActions" method="post" asp-action="WalletActions" asp-route-walletId="@walletId">
-        		    <button id="BumpFee" name="command" type="submit" class="dropdown-item" value="cpfp">Bump fee (CPFP)</button>
-                </form> 
+                    <button id="BumpFee" name="command" type="submit" class="dropdown-item" value="cpfp">Bump fee (CPFP)</button>
+                </form>
             </div>
         </div>
     </div>
-    
+
     <div class="row">
         <div class="col table-responsive-md">
             <table class="table table-hover">
@@ -198,7 +224,9 @@
                                         <input type="hidden" name="transactionId" value="@transaction.Id"/>
                                         <div class="input-group input-group-sm p-2">
                                             <input name="addlabel" placeholder="Label name" maxlength="20" type="text" class="form-control form-control-sm"/>
-                                            <button type="submit" class="btn btn-primary btn-sm"><span class="fa fa-plus"></span></button>
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <span class="fa fa-plus"></span>
+                                            </button>
                                         </div>
                                         @if (Model.Labels.Count > 0)
                                         {
@@ -208,11 +236,17 @@
                                                 {
                                                     @if (transaction.Labels.Contains(label))
                                                     {
-                                                        <button name="removelabel" class="bg-transparent border-0 p-0" type="submit" value="@label.Text"><span class="badge" style="display:block;background-color:@label.Color;color:white;text-align:left;"><span class="fa fa-check"></span> @label.Text</span></button>
+                                                        <button name="removelabel" class="bg-transparent border-0 p-0" type="submit" value="@label.Text">
+                                                            <span class="badge" style="display:block;background-color:@label.Color;color:white;text-align:left;">
+                                                                <span class="fa fa-check"></span> @label.Text
+                                                            </span>
+                                                        </button>
                                                     }
                                                     else
                                                     {
-                                                        <button name="addlabelclick" class="bg-transparent border-0 p-0" type="submit" value="@label.Text"><span class="badge" style="display:block;background-color:@label.Color;color:white;text-align:left;">@label.Text</span></button>
+                                                        <button name="addlabelclick" class="bg-transparent border-0 p-0" type="submit" value="@label.Text">
+                                                            <span class="badge" style="display:block;background-color:@label.Color;color:white;text-align:left;">@label.Text</span>
+                                                        </button>
                                                     }
                                                 }
                                             </div>
