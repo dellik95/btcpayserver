@@ -1,0 +1,137 @@
+version: "3"
+services:
+  btcpayserver:
+    restart: unless-stopped
+    build: 
+      context: .
+      dockerfile: server.Dockerfile
+    expose:
+    - "49392"
+    environment:
+      BTCPAY_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Database=btcpayserver${NBITCOIN_NETWORK:-regtest}
+      BTCPAY_NETWORK: ${NBITCOIN_NETWORK:-regtest}
+      BTCPAY_BIND: 0.0.0.0:49392
+      BTCPAY_BTCEXPLORERURL: http://nbxplorer:32838
+      BTCPAY_ROOTPATH: ${BTCPAY_ROOTPATH:-/}
+      BTCPAY_SSHCONNECTION: "root@host.docker.internal"
+      BTCPAY_SSHTRUSTEDFINGERPRINTS: ${BTCPAY_SSHTRUSTEDFINGERPRINTS}
+      BTCPAY_SSHKEYFILE: ${BTCPAY_SSHKEYFILE}
+      BTCPAY_SSHAUTHORIZEDKEYS: ${BTCPAY_SSHAUTHORIZEDKEYS}
+      BTCPAY_DEBUGLOG: btcpay.log
+      BTCPAY_UPDATEURL: https://api.github.com/repos/btcpayserver/btcpayserver/releases/latest
+      BTCPAY_DOCKERDEPLOYMENT: "true"
+      HIDDENSERVICE_NAME: BTCPayServer
+      HIDDENSERVICE_REVERSEPROXY: nginx
+      BTCPAY_TORRCFILE: /usr/local/etc/tor/torrc-2
+      BTCPAY_SOCKSENDPOINT: tor:9050
+    links:
+    - postgres
+    - bitcoind
+    volumes:
+    - "btcpay_datadir:/datadir"
+    - "nbxplorer_datadir:/root/.nbxplorer"
+    - "btcpay_pluginsdir:/root/.btcpayserver/Plugins"
+    - "tor_servicesdir:/var/lib/tor/hidden_services"
+    - "tor_torrcdir:/usr/local/etc/tor/"
+    ports:
+    - "14142:49392"
+
+  bitcoind:
+    restart: unless-stopped
+    image: btcpayserver/bitcoin:22.0
+    environment:
+      BITCOIN_NETWORK: regtest
+      BITCOIN_WALLETDIR: "/data/wallets"
+      BITCOIN_EXTRA_ARGS: |-
+        rpcuser=ceiwHEbqWI83
+        rpcpassword=DwubwWsoo3
+        rpcport=43782
+        rpcbind=0.0.0.0:43782
+        rpcallowip=0.0.0.0/0
+        port=39388
+        whitelist=0.0.0.0/0
+        zmqpubrawblock=tcp://0.0.0.0:28332
+        zmqpubrawtx=tcp://0.0.0.0:28333
+        deprecatedrpc=signrawtransaction
+        fallbackfee=0.0002
+    ports:
+      - "43782:43782"
+      - "39388:39388"
+    expose:
+      - "43782" # RPC
+      - "39388" # P2P
+      - "28332" # ZMQ
+      - "28333" # ZMQ
+    volumes:
+      - "bitcoin_datadir:/data"
+
+
+  postgres:
+    restart: unless-stopped
+    image: btcpayserver/postgres:13.6
+    command: ["-c", "random_page_cost=1.0"]
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+    - "postgres_datadir:/var/lib/postgresql/data"
+    
+  nbxplorer:
+    restart: unless-stopped
+    image: nicolasdorier/nbxplorer:2.2.20
+    ports:
+      - "32838:32838"
+    expose:
+    - "32838"
+    environment:
+      NBXPLORER_NETWORK: regtest
+      NBXPLORER_CHAINS: "btc"
+      NBXPLORER_BTCRPCURL: http://bitcoind:43782/
+      NBXPLORER_BTCNODEENDPOINT: bitcoind:39388
+      NBXPLORER_BTCRPCUSER: ceiwHEbqWI83
+      NBXPLORER_BTCRPCPASSWORD: DwubwWsoo3
+      NBXPLORER_BIND: 0.0.0.0:32838
+      NBXPLORER_MINGAPSIZE: 5
+      NBXPLORER_MAXGAPSIZE: 10
+      NBXPLORER_VERBOSE: 1
+      NBXPLORER_EXPOSERPC: 1
+      NBXPLORER_NOAUTH: 1
+      NBXPLORER_SIGNALFILESDIR: /datadir
+    volumes:
+    - "nbxplorer_datadir:/datadir"
+  tor:
+    restart: unless-stopped
+    image: btcpayserver/tor:0.4.6.5
+    container_name: tor
+    environment:
+      TOR_PASSWORD: btcpayserver
+      TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2
+      TOR_EXTRA_ARGS: |
+        CookieAuthentication 1
+    expose:
+    - "9050"
+    - "9051"
+    volumes:
+    - "tor_datadir:/home/tor/.tor"
+    - "tor_torrcdir:/usr/local/etc/tor"
+    - "tor_servicesdir:/var/lib/tor/hidden_services"
+  tor-gen:
+    restart: unless-stopped
+    image: btcpayserver/docker-gen:0.7.8
+    container_name: tor-gen
+    volumes:
+    - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    - "./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
+    - "tor_torrcdir:/usr/local/etc/tor"
+    entrypoint: /usr/local/bin/docker-gen -notify-sighup tor -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
+    links:
+    - tor
+volumes:
+  btcpay_datadir: 
+  btcpay_pluginsdir: 
+  postgres_datadir: 
+  nbxplorer_datadir: 
+  tor_datadir: 
+  tor_torrcdir: 
+  tor_servicesdir: 
+  bitcoin_datadir:
+networks: {}
